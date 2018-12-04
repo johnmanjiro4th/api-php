@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<title>削除</title>
+<script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+</head>
+<body>
+<p>メンバー削除</p>
+<form name="fm" method="GET">
+  <label>e_code（半角４桁）：<input type="text" name="q" size="15"></label>
+  <input type="button" id="btnsend" name="submit" value="検索">
+</form>
+<div id="result"></div><!-- このdiv内に整形したデータを非同期で入れる -->
+
+<script type="application/javascript">
+$(function(){
+  $('#btnsend').on('click', function(){
+    $('#result').text('通信中...');
+    // Ajax通信を開始
+    $.ajax({
+      url: 'http://localhost:3000/persons',
+      type: 'GET',
+      dataType: 'json',
+      // フォーム要素の内容をハッシュ形式に変換
+      data: $('form').serializeArray(),
+      timeout: 5000,
+    })
+    .done(function(data) {
+      // 通信成功時の処理を記述
+      $('#result').text('');
+      $.each(data, function(key, val) {
+        $('#result').append(
+          `
+            <form class="delete" method="POST">
+              <ul>
+                <li>${val.id}</li>
+                <ul>
+                  <li>${val.e_code}</li>
+                  <li>${val.e_name}</li/>
+                  <li>${val.local_station}</li>
+                  <div><input type="button" id="btndelete" name="submit" value="削除"></div>
+                </ul>
+              </ul>
+            </form>
+          `
+        );
+      });
+
+      $('#result').on('click', '#btndelete', function(){
+        // Ajax通信を開始
+        var id = $('#result').find('#id').text();
+        var url = 'http://localhost:3000/persons/' + id
+        $('#result').text('通信中...');
+        $.ajax({
+          url: url,
+          type: 'DELETE',
+          dataType: 'json',
+          // フォーム要素の内容をハッシュ形式に変換
+          data: reqParams,
+          timeout: 5000,
+        })
+        .done(function(data) {
+          // 通信成功時の処理を記述
+          $('#result').text('request success!');
+        })
+        .fail(function() {
+            // 通信失敗時の処理を記述
+            $('#result').text('request failed!');
+        });
+      });
+    })
+    .fail(function() {
+        // 通信失敗時の処理を記述
+        $('#result').text('request failed!');
+    });
+  });
+});
+</script>
+
+</body>
+</html>

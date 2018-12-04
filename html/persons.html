@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="ja">
+ <head>
+   <meta charset="UTF-8">
+   <title>検索</title>
+ <!-- <script type=“application/javascript” src=“jquery-3.3.1.js”></script> -->
+ <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+ </head>
+ <body>
+   <p>メンバー検索フォーム</p>
+   <form name="fm" method="GET">
+     <label>検索テキスト：<input type="text" name="q" size="1"></label>
+     <input type="button" id="btnsend" value="検索" name="submit">
+   </form>
+   <div id="result"></div>
+   <!-- このdiv内に整形したデータを非同期で入れる -->
+
+   <script type="application/javascript">
+     $(function(){
+       $('#btnsend').on('click', function(){
+         $('#result').text('通信中...');
+         // Ajax通信を開始
+         $.ajax({
+           url: 'http://localhost:3000/persons',
+           type: 'GET',
+           dataType: 'json',
+           // フォーム要素の内容をハッシュ形式に変換
+           data: $('form').serializeArray(),
+           timeout: 5000,
+         })
+         // .done(function(data) {
+         //     // 通信成功時の処理を記述
+         //     $(‘#result’).text(JSON.stringify(data));
+         //     $.each(data, function(key, val) {
+         //         $(‘#result’).append(“<br>” +“Data: ” + key + ” = ” + val[“id”] + “<br>“);
+         //     });
+         // })
+         .done(function(data) {
+           // 通信成功時の処理を記述
+           $('#result').text('');
+           $.each(data, function(key, val) {
+             $('#result').append(
+             `
+              <ul>
+                <li>${val.id}</li>
+                <ul>
+                  <li>${val.e_code}</li>
+                  <li>${val.e_name}</li/>
+                  <li>${val.local_station}</li>
+                </ul>
+              </ul>
+             `
+             );
+           });
+         })
+         .fail(function() {
+             // 通信失敗時の処理を記述
+             $('#result').text('request failed!');
+         });
+       });
+     });
+   </script>
+ </body>
+</html>
